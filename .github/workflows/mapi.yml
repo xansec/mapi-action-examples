@@ -17,7 +17,6 @@ env:
 
 jobs:
   build:
-    name: 'Build API container'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
