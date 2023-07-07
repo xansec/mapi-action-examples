@@ -19,33 +19,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2.1.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4.3.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4.3.0
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4.0.0
-        with:
-          context: .
-          file: docker/mapi.dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4.0.0
+      with:
+        context: .
+        file: docker/mapi.dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
 
-      outputs:
-        image: ${{ steps.meta.outputs.tags }}
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
 
 
   mapi:
@@ -54,56 +54,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Set up API
-      - name: Run API container
-        run: docker run --rm -d --network host --name ${{ env.CONTAINER_NAME }} ${{ needs.build.outputs.image }}
+    # Set up API
+    - name: Run API container
+      run: docker run --rm -d --network host --name ${{ env.CONTAINER_NAME }} ${{ needs.build.outputs.image }}
 
-      # Run mAPI
-      - uses: ForAllSecure/mapi-action@v1
-        name: Run Mayhem for API
-        continue-on-error: true
-        with:
-          mapi-token: ${{ secrets.MAPI_TOKEN }}
-          api-url: http://localhost:8000
-          api-spec: http://localhost:8000/openapi.json
-          target: forallsecure/xansec-mapi-action-examples
-          sarif-report: mapi.sarif
-          html-report: mapi.html
+    # Run mAPI
+    - uses: ForAllSecure/mapi-action@v1
+      name: Run Mayhem for API
+      continue-on-error: true
+      with:
+        mapi-token: ${{ secrets.MAPI_TOKEN }}
+        api-url: http://localhost:8000
+        api-spec: http://localhost:8000/openapi.json
+        target: forallsecure/xansec-mapi-action-examples
+        sarif-report: mapi.sarif
+        html-report: mapi.html
 
-      # Run coverage
-      - name: Generate coverage.xml
-        run: docker exec ${{ env.CONTAINER_NAME }} "coverage xml"
+    # Run coverage
+    - name: Generate coverage.xml
+      run: docker exec ${{ env.CONTAINER_NAME }} "coverage xml"
 
-      # Copy coverage
-      - name: Copy coverage
-        run: docker cp ${{ env.CONTAINER_NAME }}:/api/coverage.xml .
+    # Copy coverage
+    - name: Copy coverage
+      run: docker cp ${{ env.CONTAINER_NAME }}:/api/coverage.xml .
 
-      # Stop API
-      - name: Stop API container
-        run: docker kill ${{ env.CONTAINER_NAME }}
+    # Stop API
+    - name: Stop API container
+      run: docker kill ${{ env.CONTAINER_NAME }}
 
-      # codecov action requires a coverage.xml file
-      - name: Generate coverage.xml
-        run: coverage xml
+    # codecov action requires a coverage.xml file
+    - name: Generate coverage.xml
+      run: coverage xml
 
-      # github codecov action
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: coverage.xml
-          flags: vulnerability-tests
-          name: mayhem
-          fail_ci_if_error: true
+    # github codecov action
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: coverage.xml
+        flags: vulnerability-tests
+        name: mayhem
+        fail_ci_if_error: true
 
-      # Archive HTML report
-      - name: Archive Mayhem for API report
-        uses: actions/upload-artifact@v3
-        with:
-          name: mapi-report
-          path: mapi.html
+    # Archive HTML report
+    - name: Archive Mayhem for API report
+      uses: actions/upload-artifact@v3
+      with:
+        name: mapi-report
+        path: mapi.html
 
-      # Upload SARIF file (only available on public repos or github enterprise)
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: mapi.sarif
+    # Upload SARIF file (only available on public repos or github enterprise)
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: mapi.sarif
