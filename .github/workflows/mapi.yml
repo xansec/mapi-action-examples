@@ -67,7 +67,7 @@ jobs:
 
     # Run coverage
     - name: Generate coverage.xml
-      run: docker exec ${{ env.CONTAINER_NAME }} "coverage xml"
+      run: docker exec ${{ env.CONTAINER_NAME }} bash -c 'coverage xml'
 
     # Copy coverage
     - name: Copy coverage
