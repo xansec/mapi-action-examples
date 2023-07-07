@@ -81,10 +81,6 @@ jobs:
     - name: Stop API container
       run: docker kill ${{ env.CONTAINER_NAME }}
 
-    # codecov action requires a coverage.xml file
-    - name: Generate coverage.xml
-      run: coverage xml
-
     # github codecov action
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
