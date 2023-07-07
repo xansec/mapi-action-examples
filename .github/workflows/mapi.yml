@@ -61,9 +61,13 @@ jobs:
         mapi-token: ${{ secrets.MAPI_TOKEN }}
         api-url: http://localhost:8000
         api-spec: http://localhost:8000/openapi.json
-        target: forallsecure/mapi-action-examples
+        target: forallsecure/mapi-action-examples/fastapi
         sarif-report: mapi.sarif
         html-report: mapi.html
+
+    # Kill python if it's still running, ignoring any errors
+    - name: Shut down API
+      run: docker exec ${{ env.CONTAINER_NAME }} bash -c 'pgrep coverage | xargs kill || true; sleep 5'
 
     # Run coverage
     - name: Generate coverage.xml
