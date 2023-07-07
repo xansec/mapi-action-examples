@@ -9,4 +9,6 @@ ENV FASTAPI_ENV=test
 
 EXPOSE 8000
 
-ENTRYPOINT ["coverage", "run", "-m", "uvicorn", "src.main:app"]
+RUN mkdir /coverage
+
+ENTRYPOINT ["coverage", "run", "--data-file=/coverage/coverage.xml", "-m", "uvicorn", "src.main:app"]

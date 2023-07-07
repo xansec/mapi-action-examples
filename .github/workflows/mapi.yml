@@ -10,6 +10,10 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   CONTAINER_NAME: 'mapi-action-examples'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -51,7 +55,7 @@ jobs:
     steps:
     # Set up API
     - name: Run API container
-      run: docker run --rm -d --network host --name ${{ env.CONTAINER_NAME }} ${{ needs.build.outputs.image }}
+      run: docker run --rm -d --network host -v $(pwd):/coverage --name ${{ env.CONTAINER_NAME }} ${{ needs.build.outputs.image }}
 
     # Run mAPI
     - uses: ForAllSecure/mapi-action@v1
@@ -65,21 +69,9 @@ jobs:
         sarif-report: mapi.sarif
         html-report: mapi.html
 
-    # Kill python if it's still running, ignoring any errors
-    - name: Shut down API
-      run: docker exec ${{ env.CONTAINER_NAME }} bash -c 'pgrep coverage | xargs kill || true; sleep 5'
-
-    # Run coverage
-    - name: Generate coverage.xml
-      run: docker exec ${{ env.CONTAINER_NAME }} bash -c 'coverage xml'
-
-    # Copy coverage
-    - name: Copy coverage
-      run: docker cp ${{ env.CONTAINER_NAME }}:/api/coverage.xml .
-
     # Stop API
     - name: Stop API container
-      run: docker kill ${{ env.CONTAINER_NAME }}
+      run: docker kill --signal=SIGINT ${{ env.CONTAINER_NAME }}
 
     # github codecov action
     - name: Upload coverage to Codecov
