@@ -65,7 +65,7 @@ jobs:
         mapi-token: ${{ secrets.MAPI_TOKEN }}
         api-url: http://localhost:8000
         api-spec: http://localhost:8000/openapi.json
-        target: forallsecure/mapi-action-examples/fastapi
+        target: forallsecure/mapi-action-examples
         sarif-report: mapi.sarif
         html-report: mapi.html
 
