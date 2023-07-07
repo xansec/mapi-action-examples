@@ -8,12 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  CONTAINER_NAME: 'demo-api'
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  CONTAINER_NAME: 'demo-api'
+  CONTAINER_NAME: 'mapi-action-examples'
 
 jobs:
   build:
@@ -66,7 +61,7 @@ jobs:
         mapi-token: ${{ secrets.MAPI_TOKEN }}
         api-url: http://localhost:8000
         api-spec: http://localhost:8000/openapi.json
-        target: forallsecure/xansec-mapi-action-examples
+        target: forallsecure/mapi-action-examples
         sarif-report: mapi.sarif
         html-report: mapi.html
 
